@@ -1,0 +1,8 @@
+{
+  "name": "HostelMate",
+  "description": "A hostel student platform where students going out can post trips and peers can request items from those trips.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Zap, Bell, Calendar, Users, User, Compass as Explore, MapPin, X, Loader2 } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { supabase } from '../lib/supabase';
 
 export default function Home() {
   const { getToken } = useAuth();
@@ -13,19 +12,6 @@ export default function Home() {
 
   useEffect(() => {
     fetchTrips();
-
-    // Set up Realtime Subscription
-    const channel = supabase
-      .channel('public:trips')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'trips' }, () => {
-        // Re-fetch everything to ensure relational UI data (like user avatars) is accurate
-        fetchTrips();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const fetchTrips = async () => {

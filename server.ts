@@ -13,7 +13,6 @@ import requestRoutes from './server/routes/requests.js';
 import chatRoutes from './server/routes/chat.js';
 import ratingRoutes from './server/routes/ratings.js';
 import userRoutes from './server/routes/users.js';
-import notificationRoutes from './server/routes/notifications.js';
 
 dotenv.config();
 
@@ -37,7 +36,6 @@ async function startServer() {
   app.use('/api/chat', chatRoutes);
   app.use('/api/ratings', ratingRoutes);
   app.use('/api/users', userRoutes);
-  app.use('/api/notifications', notificationRoutes);
 
   // Health Check
   app.get('/api/health', (req, res) => {

@@ -31,18 +31,12 @@ export const tripsController = {
   // Create a new trip
   createTrip: async (req: any, res: Response) => {
     try {
-      const { destination, eta, stops, scheduled_time } = req.body;
+      const { destination, eta } = req.body;
       const userId = req.user.id;
 
       const { data, error } = await supabase
         .from('trips')
-        .insert([{
-          user_id: userId,
-          destination,
-          eta,
-          stops: stops || [],
-          scheduled_time: scheduled_time || null
-        }])
+        .insert([{ user_id: userId, destination, eta }])
         .select()
         .single();
 

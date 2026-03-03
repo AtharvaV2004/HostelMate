@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase.js';
-import { notificationsController } from './notificationsController.js';
 
 export const requestsController = {
   // Create item request on a trip
   createRequest: async (req: any, res: Response) => {
     try {
       const { id: tripId } = req.params;
-      const { item_name, quantity, max_budget, photo_url, urgency, is_urgent } = req.body;
+      const { item_name, quantity, max_budget, photo_url, urgency } = req.body;
       const requesterId = req.user.id;
 
       // 1. Check if trip exists and is active
@@ -41,19 +40,12 @@ export const requestsController = {
           quantity,
           max_budget,
           photo_url,
-          urgency,
-          is_urgent: is_urgent || false
+          urgency
         }])
         .select()
         .single();
 
       if (error) throw error;
-
-      // Send push notification to the trip creator
-      await notificationsController.sendNotificationToUser(trip.user_id, {
-        title: 'New Request!',
-        body: `Someone requested ${item_name} on your trip to ${trip.destination}`
-      });
 
       res.status(201).json({ success: true, data });
     } catch (error: any) {
@@ -90,13 +82,6 @@ export const requestsController = {
         .single();
 
       if (error) throw error;
-
-      // Send push notification about status change
-      const notificationRecipient = isOwner ? request.requester_id : request.trips.user_id;
-      await notificationsController.sendNotificationToUser(notificationRecipient, {
-        title: 'Request Update',
-        body: `Request status changed to ${status}`
-      });
 
       res.json({ success: true, data });
     } catch (error: any) {

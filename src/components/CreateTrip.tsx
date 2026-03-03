@@ -10,20 +10,8 @@ export default function CreateTrip() {
     const [eta, setEta] = useState(45); // minutes
     const [capacity, setCapacity] = useState(5);
     const [acceptRequests, setAcceptRequests] = useState(true);
-    const [stops, setStops] = useState<string[]>(['']);
-    const [isScheduled, setIsScheduled] = useState(false);
-    const [scheduledTime, setScheduledTime] = useState('');
+    const [destination, setDestination] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleAddStop = () => setStops([...stops, '']);
-    const handleStopChange = (index: number, value: string) => {
-        const newStops = [...stops];
-        newStops[index] = value;
-        setStops(newStops);
-    };
-    const handleRemoveStop = (index: number) => {
-        if (stops.length > 1) setStops(stops.filter((_, i) => i !== index));
-    };
 
     // Mock pending requests to show in UI
     const pendingRequests = [
@@ -44,10 +32,8 @@ export default function CreateTrip() {
             const token = await getToken();
 
             const payload = {
-                destination: stops[stops.length - 1] || 'Hostel Run',
-                stops: stops.filter(s => s.trim() !== ''),
-                eta: `In ${eta} mins`,
-                scheduled_time: isScheduled && scheduledTime ? new Date(scheduledTime).toISOString() : null,
+                destination: destination || 'Hostel Run',
+                eta: `In ${eta} mins`
             };
 
             const response = await fetch('http://localhost:3000/api/trips', {
@@ -96,58 +82,24 @@ export default function CreateTrip() {
 
             <main className="p-6 space-y-8 max-w-md mx-auto">
                 <section>
-                    <div className="mb-4 space-y-3">
-                        <label className="text-sm font-semibold uppercase tracking-widest text-[#D9B08C]/80 px-1 block">Stops / Destinations</label>
-                        {stops.map((stop, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    placeholder={index === 0 ? "First stop..." : "Next stop..."}
-                                    value={stop}
-                                    onChange={(e) => handleStopChange(index, e.target.value)}
-                                    className="flex-1 bg-[#D1E8E2]/5 backdrop-blur-md border border-[#D1E8E2]/15 p-4 rounded-2xl text-[#D1E8E2] placeholder:text-[#D1E8E2]/40 focus:outline-none focus:border-[#116466] transition-all"
-                                />
-                                {stops.length > 1 && (
-                                    <button onClick={() => handleRemoveStop(index)} className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/20 text-red-400 border border-red-500/30">
-                                        <Minus className="w-5 h-5" />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                        <button onClick={handleAddStop} className="w-full py-3 border border-dashed border-[#116466]/50 text-[#116466] rounded-2xl font-bold text-sm tracking-widest uppercase flex items-center justify-center gap-2 hover:bg-[#116466]/10 transition-colors">
-                            <Plus className="w-4 h-4" /> Add Another Stop
-                        </button>
+                    <div className="mb-4">
+                        <label className="text-sm font-semibold uppercase tracking-widest text-[#D9B08C]/80 px-1 mb-2 block">Destination</label>
+                        <input
+                            type="text"
+                            placeholder="Where are you going?"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            className="w-full bg-[#D1E8E2]/5 backdrop-blur-md border border-[#D1E8E2]/15 p-4 rounded-2xl text-[#D1E8E2] placeholder:text-[#D1E8E2]/40 focus:outline-none focus:border-[#116466] transition-all"
+                        />
                     </div>
-
-                    <div className="mb-4 mt-6">
-                        <div className="flex items-center justify-between bg-[#D1E8E2]/5 backdrop-blur-md p-4 rounded-xl border border-white/5">
-                            <div className="flex flex-col">
-                                <span className="font-medium text-sm">Schedule for later?</span>
-                                <span className="text-[10px] text-[#D1E8E2]/50">Plan a trip in advance</span>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" className="sr-only peer" checked={isScheduled} onChange={() => setIsScheduled(!isScheduled)} />
-                                <div className="w-14 h-7 bg-[#2C3531] rounded-full peer peer-checked:bg-[#116466]/20 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#116466] after:border after:rounded-full after:h-6 after:w-6 transition-all peer-checked:after:translate-x-full"></div>
-                            </label>
-                        </div>
-                        {isScheduled && (
-                            <input
-                                type="datetime-local"
-                                value={scheduledTime}
-                                onChange={(e) => setScheduledTime(e.target.value)}
-                                className="w-full mt-3 bg-[#D1E8E2]/5 backdrop-blur-md border border-[#D1E8E2]/15 p-4 rounded-2xl text-[#D1E8E2] focus:outline-none"
-                            />
-                        )}
-                    </div>
-
                     <h2 className="text-sm font-semibold uppercase tracking-widest text-[#D9B08C]/80 mb-4 px-1 mt-6">Open Requests</h2>
                     <div className="grid grid-cols-2 gap-4">
-                        {categories.map((cat) => (
+                        {categories.map((cat, i) => (
                             <button
                                 key={cat.id}
-                                onClick={() => handleStopChange(stops.length - 1, cat.name)}
+                                onClick={() => setDestination(cat.name)}
                                 className={`flex flex-col items-center justify-center p-6 rounded-2xl bg-[#D1E8E2]/5 backdrop-blur-md relative overflow-hidden group transition-all
-                  ${stops.includes(cat.name)
+                  ${destination === cat.name
                                         ? 'shadow-[inset_0_0_15px_rgba(17,100,102,0.6),0_0_20px_rgba(17,100,102,0.3)] border-[#116466]/50'
                                         : 'shadow-[6px_6px_12px_rgba(0,0,0,0.3),-2px_-2px_6px_rgba(255,255,255,0.05)] border-white/5 hover:bg-white/5'
                                     }`}
@@ -244,7 +196,7 @@ export default function CreateTrip() {
 
                 <div className="pt-6 pb-10">
                     <button
-                        disabled={isSubmitting || stops[0].trim() === '' || (isScheduled && !scheduledTime)}
+                        disabled={isSubmitting || !destination}
                         onClick={handleCreateTrip}
                         className="w-full h-20 bg-[#116466] rounded-2xl border-t-4 border-white/20 shadow-[6px_6px_12px_rgba(0,0,0,0.3),-2px_-2px_6px_rgba(255,255,255,0.05)] flex flex-col items-center justify-center transition-transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none group relative overflow-hidden"
                     >

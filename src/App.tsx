@@ -11,8 +11,10 @@ import CheckoutHandoff from './components/CheckoutHandoff';
 import Trips from './components/Trips';
 import Social from './components/Social';
 import EditProfile from './components/EditProfile';
+import { usePushNotifications } from './hooks/usePushNotifications';
 
 export default function App() {
+  usePushNotifications();
   return (
     <Router>
       <Routes>

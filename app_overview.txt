@@ -1,0 +1,75 @@
+==============================
+HOSTELMATE: APP OVERVIEW & CONCEPT
+==============================
+
+------------------------------
+1. CONCEPT OF THE APP
+------------------------------
+HostelMate is a peer-to-peer errand-running and item-requesting platform designed specifically for hostel and college students. 
+
+The core problem it solves: Students frequently need small items from outside the hostel (snacks, stationary, medicine, food), but it's inefficient for everyone to make individual trips. 
+
+How it works:
+- When a student is heading out (e.g., to a market, convenience store, or restaurant), they announce it by posting a "Trip" on the app using the "I'M GOING OUT" button.
+- Other students in the hostel can view active trips on their Home Dashboard.
+- If they need something from that location, they can place an "Order/Request" on that specific trip.
+- The app facilitates coordination through a dedicated in-app Chat for each trip.
+- To ensure security and accountability, the app features a QR Code Handoff system. When the student returns and delivers the requested item, the requester scans a QR code to confirm successful delivery.
+
+This creates a highly collaborative, efficient, and social ecosystem within the hostel environment.
+
+------------------------------
+2. COMPLETE TECH STACK
+------------------------------
+Frontend:
+- Core Framework: React 19 built with Vite.
+- Language: TypeScript.
+- Routing: React Router v7 (react-router-dom).
+- Styling: Tailwind CSS v4. The project utilizes a heavy dark-mode glassmorphic design system heavily featuring emerald/teal colors (#116364, #1A1F1D).
+- Icons & Animations: lucide-react for crisp UI iconography and motion (Framer Motion) for sophisticated animations.
+
+Backend & Infrastructure:
+- Server: Node.js with Express.js. Built using TypeScript (tsx for local execution).
+- Database: Supabase (PostgreSQL) acting as the primary store.
+- Authentication: Clerk handles user identity. It is integrated on both the frontend (@clerk/clerk-react) and the backend API via middleware (@clerk/clerk-sdk-node).
+
+------------------------------
+3. APP ARCHITECTURE & FOLDER STRUCTURE
+------------------------------
+The app is a monorepo that tightly couples the Vite frontend and Express backend.
+
+- server.ts: The main entry point. In production, this spins up the Express server and serves the compiled frontend. In development, it acts as a combined server—Vite runs in middleware mode right alongside your Express API routes.
+
+server/ directory: Contains your backend logic mapped to standard MVC-like architecture:
+- /config/supabase.ts: Handles the database connection instance.
+- /routes/: Defines the API endpoints (trips, requests, chat, ratings, users).
+- /controllers/: Holds the actual business logic for interacting with Supabase.
+- /middleware/: Includes Clerk Auth verification (ClerkExpressWithAuth), error handlers, and a syncUser middleware ensuring Clerk users exist in your Supabase DB.
+
+src/ directory: The React frontend:
+- App.tsx & main.tsx: Setup React Router and inject the <ClerkProvider>.
+- /components/: Holds all the UI pages: Home, Login, Profile, EditProfile, CreateTrip, TripDetails, Trips, Chat, Social, and CheckoutHandoff.
+
+------------------------------
+4. CORE FEATURES & WORKFLOWS
+------------------------------
+- Authentication: Users log in securely via Clerk (which can handle OTPs, OAuth, etc.). The Express backend verifies Clerk JWT tokens before fulfilling any API requests.
+- Home Dashboard: Fetches a live list of "Active Trips" from your database. Users can view the ETA, see who is posting the trip, join a chat, or request items.
+- Posting a Trip: The massive "I'M GOING OUT" button kicks off the flow for a student to declare they are leaving the hostel (e.g., going to a store/restaurant), allowing others to piggyback on their errand.
+- Requests & Chat: Peers can place orders/requests on a trip. There is dedicated chat infrastructure (/api/chat) for users attached to a specific trip to communicate.
+- QR Code Handoff: The backend includes /api/requests/:id/qr routes. This ensures secure transfer/delivery validation between the trip creator and the requester when they return to the hostel.
+- Profile system: Beautifully designed tracking of total stays/errands, communities, and preferences, equipped with the new Edit Profile form allowing users to update bios, change photos, and set their hostel room number.
+
+------------------------------
+5. LOCAL SETUP INSTRUCTIONS
+------------------------------
+1. Environment Variables: Ensure you have an .env file at the root containing:
+   - SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY
+   - VITE_CLERK_PUBLISHABLE_KEY (Required for Vite)
+   - CLERK_SECRET_KEY (For Express backend validation)
+
+2. Database Setup: Execute the SQL from setup.sql in your Supabase dashboard to create the tables.
+
+3. Install Dependencies: Run `npm install` in the terminal.
+
+4. Boot the Environment: Run `npm run dev`. This starts both the frontend Vite dev server and the backend Express APIs simultaneously on localhost:3000.

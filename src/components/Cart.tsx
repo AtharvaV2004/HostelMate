@@ -1,35 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, ShoppingCart, Trash2, Info, Plus, X } from 'lucide-react';
 
 export default function Cart() {
     const { id } = useParams(); // trip id
+    const { getToken } = useAuth();
     const navigate = useNavigate();
 
-    // Mock cart items based on Stitch design
-    const [items, setItems] = useState([
-        {
-            id: 1,
-            name: "Cold Brew Coffee",
-            description: "Starbucks • Venti",
-            price: 350.00,
-            quantity: 1,
-            image: "https://images.unsplash.com/photo-1515442261605-65987783cb6a?q=80&w=200&auto=format&fit=crop"
-        },
-        {
-            id: 2,
-            name: "Vegan Burger",
-            description: "Burger King • Meal",
-            price: 450.00,
-            quantity: 1,
-            image: "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?q=80&w=200&auto=format&fit=crop"
-        }
-    ]);
+    // UI state for items added locally
+    const [items, setItems] = useState<any[]>([]);
 
     const [showAddItem, setShowAddItem] = useState(false);
     const [newItemName, setNewItemName] = useState('');
     const [newItemDesc, setNewItemDesc] = useState('');
     const [newItemPrice, setNewItemPrice] = useState('');
+    const [isUrgent, setIsUrgent] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleAddItem = (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,6 +28,7 @@ export default function Cart() {
             description: newItemDesc || 'Custom Item',
             price: parseFloat(newItemPrice),
             quantity: 1,
+            is_urgent: isUrgent,
             image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop" // Default grocery bag image
         };
 
@@ -49,6 +37,44 @@ export default function Cart() {
         setNewItemName('');
         setNewItemDesc('');
         setNewItemPrice('');
+        setIsUrgent(false);
+    };
+
+    const handleConfirmRequest = async () => {
+        if (items.length === 0 || !id || isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            const token = await getToken();
+
+            // Loop and submit all requests
+            // In a better design, bulk insert API should be used, but we'll use a Promise.all over existing endpoint
+            await Promise.all(items.map(async (item) => {
+                const payload = {
+                    item_name: item.name + (item.description ? ` (${item.description})` : ''),
+                    quantity: item.quantity,
+                    max_budget: item.price * item.quantity,
+                    is_urgent: item.is_urgent
+                };
+
+                await fetch(`http://localhost:3000/api/requests/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }));
+
+            // Clear and redirect back
+            setItems([]);
+            navigate(`/trip/${id}`);
+        } catch (error) {
+            console.error("Failed to confirm requests", error);
+            alert("Error confirming requests");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const updateQuantity = (id: number, delta: number) => {
@@ -107,9 +133,14 @@ export default function Cart() {
                                 <div>
                                     <div className="flex justify-between items-start">
                                         <h3 className="font-bold text-[#D1E8E2]">{item.name}</h3>
-                                        <button onClick={() => removeItem(item.id)} className="text-[#D9B08C]/60 hover:text-[#FFCB9A]">
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            {item.is_urgent && (
+                                                <span className="bg-red-500/20 text-red-500 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">Urgent</span>
+                                            )}
+                                            <button onClick={() => removeItem(item.id)} className="text-[#D9B08C]/60 hover:text-[#FFCB9A]">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                     <p className="text-xs text-[#D9B08C]">{item.description}</p>
                                 </div>
@@ -185,6 +216,16 @@ export default function Cart() {
                                     className="w-full bg-[#1A1F1D] border-none rounded-xl p-3 text-[#D1E8E2] placeholder:text-[#D1E8E2]/30 focus:ring-1 focus:ring-[#116466]"
                                 />
                             </div>
+                            <div className="flex items-center justify-between bg-[#1A1F1D] rounded-xl p-3">
+                                <div className="flex flex-col">
+                                    <span className="font-medium text-sm text-[#D1E8E2]">Mark as Urgent?</span>
+                                    <span className="text-[10px] text-red-400">Notifies the courier immediately</span>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" checked={isUrgent} onChange={() => setIsUrgent(!isUrgent)} />
+                                    <div className="w-11 h-6 bg-[#2C3531] rounded-full peer peer-checked:bg-red-500/50 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-red-400 after:border-white after:border after:rounded-full after:h-5 after:w-5 transition-all peer-checked:after:translate-x-full"></div>
+                                </label>
+                            </div>
                             <button
                                 type="submit"
                                 className="w-full bg-gradient-to-br from-[#116466] to-[#0f5a5c] shadow-[0_4px_0_#0a3d3e,0_8px_15px_rgba(0,0,0,0.4)] active:translate-y-1 active:shadow-[0_2px_0_#0a3d3e,0_4px_10px_rgba(0,0,0,0.4)] text-white font-bold py-3 rounded-xl transition-all"
@@ -220,11 +261,12 @@ export default function Cart() {
                     </div>
                 </div>
                 <button
-                    disabled={items.length === 0}
+                    onClick={handleConfirmRequest}
+                    disabled={items.length === 0 || isSubmitting}
                     className="w-full bg-gradient-to-br from-[#116466] to-[#0f5a5c] shadow-[0_4px_0_#0a3d3e,0_8px_15px_rgba(0,0,0,0.4)] active:translate-y-1 active:shadow-[0_2px_0_#0a3d3e,0_4px_10px_rgba(0,0,0,0.4)] transition-all h-14 rounded-xl flex items-center justify-center gap-2 group disabled:opacity-50 disabled:pointer-events-none"
                 >
-                    <span className="text-white font-bold text-lg">Confirm Request</span>
-                    <ArrowLeft className="w-5 h-5 text-white transition-transform group-hover:translate-x-1 rotate-180" />
+                    <span className="text-white font-bold text-lg">{isSubmitting ? 'Submitting...' : 'Confirm Request'}</span>
+                    {!isSubmitting && <ArrowLeft className="w-5 h-5 text-white transition-transform group-hover:translate-x-1 rotate-180" />}
                 </button>
             </footer>
         </div>

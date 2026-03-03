@@ -35,10 +35,10 @@ export default function Profile() {
               <span className="text-slate-400 text-sm font-medium">42 Stays</span>
             </div>
           </div>
-          <button className="mt-6 flex min-w-[160px] items-center justify-center rounded-full h-11 px-6 bg-gradient-to-br from-[#222a27] to-[#181d1b] shadow-[6px_6px_12px_#0a0c0b,-4px_-4px_10px_#2a3431] border border-white/5 text-emerald-100 text-sm font-bold tracking-wide active:shadow-inner transition-all">
+          <Link to="/edit-profile" className="mt-6 flex min-w-[160px] items-center justify-center rounded-full h-11 px-6 bg-gradient-to-br from-[#222a27] to-[#181d1b] shadow-[6px_6px_12px_#0a0c0b,-4px_-4px_10px_#2a3431] border border-white/5 text-emerald-100 text-sm font-bold tracking-wide active:shadow-inner transition-all">
             <Edit className="mr-2 w-4 h-4" />
             EDIT PROFILE
-          </button>
+          </Link>
         </div>
 
         {/* Stats Dashboard */}

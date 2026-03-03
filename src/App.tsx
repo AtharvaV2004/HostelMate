@@ -10,6 +10,7 @@ import Profile from './components/Profile';
 import CheckoutHandoff from './components/CheckoutHandoff';
 import Trips from './components/Trips';
 import Social from './components/Social';
+import EditProfile from './components/EditProfile';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/trips" element={<Trips />} />
         <Route path="/social" element={<Social />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/handoff/:id" element={<CheckoutHandoff />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

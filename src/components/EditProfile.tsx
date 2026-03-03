@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Camera } from 'lucide-react';
 
@@ -7,6 +7,25 @@ export default function EditProfile() {
     const [name, setName] = useState("Alex Rivers");
     const [bio, setBio] = useState("Pro Traveler");
     const [phone, setPhone] = useState("+1 234 567 8900");
+    const [roomNo, setRoomNo] = useState("A-102");
+    const [imagePreview, setImagePreview] = useState("https://i.pravatar.cc/300?u=alex");
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
+    };
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,9 +45,16 @@ export default function EditProfile() {
             </div>
 
             <div className="px-6 -mt-8 flex flex-col items-center relative z-20">
-                <div className="relative group cursor-pointer">
+                <div className="relative group cursor-pointer" onClick={triggerFileInput}>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
                     <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32 border-4 border-[#1A1F1D] shadow-2xl overflow-hidden relative">
-                        <img src="https://i.pravatar.cc/300?u=alex" alt="Alex Rivers" className="w-full h-full object-cover" />
+                        <img src={imagePreview} alt="Alex Rivers" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Camera className="text-white w-8 h-8" />
                         </div>
@@ -59,6 +85,17 @@ export default function EditProfile() {
                         onChange={(e) => setBio(e.target.value)}
                         className="w-full bg-[#222a27] border border-white/5 rounded-2xl px-5 py-4 text-emerald-100 font-medium placeholder:text-slate-500 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#116364] transition-all"
                         placeholder="e.g. Pro Traveler"
+                    />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <label className="text-slate-400 text-xs font-bold uppercase tracking-widest pl-2">Room Number</label>
+                    <input
+                        type="text"
+                        value={roomNo}
+                        onChange={(e) => setRoomNo(e.target.value)}
+                        className="w-full bg-[#222a27] border border-white/5 rounded-2xl px-5 py-4 text-emerald-100 font-medium placeholder:text-slate-500 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#116364] transition-all"
+                        placeholder="e.g. A-102"
                     />
                 </div>
 

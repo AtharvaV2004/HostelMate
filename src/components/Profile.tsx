@@ -33,6 +33,8 @@ export default function Profile() {
               <span className="bg-[#116364]/20 text-[#116364] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#116364]/30 uppercase">Pro Traveler</span>
               <span className="text-slate-400 text-sm">•</span>
               <span className="text-slate-400 text-sm font-medium">42 Stays</span>
+              <span className="text-slate-400 text-sm">•</span>
+              <span className="text-slate-400 text-sm font-medium">Room A-102</span>
             </div>
           </div>
           <Link to="/edit-profile" className="mt-6 flex min-w-[160px] items-center justify-center rounded-full h-11 px-6 bg-gradient-to-br from-[#222a27] to-[#181d1b] shadow-[6px_6px_12px_#0a0c0b,-4px_-4px_10px_#2a3431] border border-white/5 text-emerald-100 text-sm font-bold tracking-wide active:shadow-inner transition-all">
